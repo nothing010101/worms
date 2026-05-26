@@ -167,7 +167,7 @@ function qe(e, t, s, a, n, i) {
     }
     return null
 }
-const H = "https://dev-api.flayerlabs.xyz"
+const H = "undefined"
   , I = "base"
   , Xe = "0xECbdB1F71a8727c291dA420d326953c749a88b07"
   , de = "0xECbdB1F71a8727c291dA420d326953c749a88b07".trim()
