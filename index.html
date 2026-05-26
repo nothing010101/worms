@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worms Agents — $WORMS Holder Rewards Playground</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: #070206; color: #fff7e6; font-family: Inter, system-ui, -apple-system, sans-serif; }
+        a { color: inherit; text-decoration: none; }
+
+        :root{
+            --ink:#09020a;
+            --paper:#fff7e6;
+            --gold:#f59e0b;
+            --lime:#34d399;
+            --cyan:#22d3ee;
+            --pink:#fb7185;
+            --border:rgba(255,255,255,0.16);
+        }
+
+        /* top nav (memecoin-ish) */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 4.8vw;
+            background: rgba(7,2,6,0.82);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(245,158,11,0.18);
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .nav-logo {
+            width: 110px;
+            height: auto;
+            image-rendering: pixelated;
+        }
+        .nav-badge {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 18px;
+            letter-spacing: 0.08em;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+        .nav-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-btn {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.06);
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .nav-btn.primary {
+            background: var(--gold);
+            color: #231005;
+            border-color: rgba(245,158,11,0.55);
+            box-shadow: 0 10px 30px rgba(245,158,11,0.25);
+        }
+        .nav-btn:hover { transform: translateY(-1px); }
+
+        /* HERO */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: calc(100vh - 58px);
+            padding: 84px 4.8vw 56px;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(251,113,133,0.18), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(34,211,238,0.14), transparent 55%),
+                radial-gradient(circle at 50% 0%, rgba(245,158,11,0.16), transparent 60%),
+                #070206;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero::before {
+            content:"";
+            position:absolute;
+            inset:-60px -60px 0 -60px;
+            background: url('/PNG/details.png');
+            opacity: 0.14;
+            image-rendering: pixelated;
+            transform: rotate(-2deg) scale(1.1);
+            pointer-events:none;
+        }
+        .hero-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+            gap: 34px;
+            align-items: center;
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 58px - 140px);
+        }
+        .hero h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(40px, 2.7vw, 78px);
+            line-height: 1.45;
+            color: var(--paper);
+            text-shadow: 0 0 18px rgba(255,255,255,0.14);
+        }
+        .hero h1 .accent { color: var(--gold); }
+        .hero p {
+            margin-top: 14px;
+            font-size: 22.5px;
+            line-height: 1.7;
+            color: rgba(255,247,230,0.78);
+            max-width: 44ch;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .pillrow {
+            margin-top: 12px;
+            display:flex;
+            gap:8px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            font-size: 16.5px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.35);
+        }
+        .pill.gold { border-color: rgba(245,158,11,0.5); color: #ffd58b; }
+        .pill.cyan { border-color: rgba(34,211,238,0.5); color: #b9f6ff; }
+        .pill.lime { border-color: rgba(52,211,153,0.5); color: #b7ffd9; }
+
+        .banner {
+            position: relative;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+        }
+        .banner::after{
+            content:none;
+        }
+        .banner-logo { width: 100%; max-width: 460px; margin: 0 auto; display:block; image-rendering: pixelated; filter: drop-shadow(0 0 36px rgba(0,0,0,0.8)); }
+
+        /* “clouds” replacement: floating sprite layers */
+        .float {
+            position: absolute;
+            image-rendering: pixelated;
+            opacity: 0.95;
+            pointer-events: none;
+            filter: drop-shadow(0 18px 30px rgba(0,0,0,0.5));
+        }
+        .f1{ width: 110px; left: 2%; top: 6%; animation: drift1 7s ease-in-out infinite alternate; }
+        .f2{ width: 140px; left: 72%; top: 14%; animation: drift2 8s ease-in-out infinite alternate; }
+        .f3{ width: 120px; left: 58%; top: 58%; animation: drift3 6.5s ease-in-out infinite alternate; }
+        .f4{ width: 96px; left: 26%; top: 86%; animation: drift2 7.5s ease-in-out infinite alternate; opacity:0.85; }
+
+        @keyframes drift1 { from{ transform: translate(0,0) rotate(-3deg);} to{ transform: translate(0,-18px) rotate(3deg);} }
+        @keyframes drift2 { from{ transform: translate(0,0) rotate(2deg);} to{ transform: translate(0,-22px) rotate(-2deg);} }
+        @keyframes drift3 { from{ transform: translate(0,0) rotate(-1deg);} to{ transform: translate(0,-50px) rotate(1deg);} }
+
+        .chevron {
+            display: grid;
+            place-items: center;
+            padding: 28px 0 10px;
+        }
+        .chev {
+            width: 18px;
+            height: 18px;
+            border-right: 3px solid rgba(255,247,230,0.65);
+            border-bottom: 3px solid rgba(255,247,230,0.65);
+            transform: rotate(45deg);
+            animation: bounce 1.3s ease-in-out infinite;
+        }
+        @keyframes bounce { 0%,100%{ transform: translateY(0) rotate(45deg);} 50%{ transform: translateY(8px) rotate(45deg);} }
+
+        /* SECTIONS */
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 44px 4.8vw 86px;
+        }
+        .wrap-bg {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 12% 15%, rgba(52,211,153,0.10), transparent 55%),
+                radial-gradient(circle at 88% 10%, rgba(34,211,238,0.10), transparent 55%),
+                radial-gradient(circle at 55% 90%, rgba(245,158,11,0.10), transparent 60%),
+                #070206;
+        }
+        .wrap-bg::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background: url('/PNG/spots.png');
+            opacity: 0.10;
+            image-rendering: pixelated;
+            pointer-events:none;
+        }
+        .section {
+            margin-top: 34px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background:
+                radial-gradient(circle at 15% 15%, rgba(251,113,133,0.10), transparent 55%),
+                radial-gradient(circle at 85% 25%, rgba(34,211,238,0.08), transparent 55%),
+                rgba(255,255,255,0.04);
+            border-radius: 18px;
+            overflow: hidden;
+            min-height: 88vh;
+            opacity: 0;
+            transform: translateY(34px) scale(0.985);
+            transition: opacity 700ms ease, transform 700ms cubic-bezier(.2,.8,.2,1);
+            will-change: transform, opacity;
+        }
+        .section.in-view {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .section-head{
+            padding: 36px 34px;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title{
+            font-family: 'Press Start 2P', monospace;
+            font-size: 21px;
+            letter-spacing: 0.08em;
+            color: var(--gold);
+        }
+        .section-sub{
+            font-size: 21px;
+            color: rgba(255,247,230,0.72);
+            max-width: 58ch;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 22px;
+            padding: 36px 34px 44px;
+        }
+        .card{
+            grid-column: span 6;
+            background: rgba(0,0,0,0.36);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 16px;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+            min-height: 230px;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 560ms ease, transform 560ms ease;
+        }
+        .card-head {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 22px;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .card-head h3 {
+            margin: 0;
+            flex: 1;
+            min-width: 0;
+            font-size: 28.5px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: var(--paper);
+            line-height: 1.2;
+        }
+        .card-desc {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: rgba(255,247,230,0.72);
+            position: relative;
+            z-index: 1;
+        }
+        .section.in-view .card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section.in-view .card:nth-child(1) { transition-delay: 60ms; }
+        .section.in-view .card:nth-child(2) { transition-delay: 120ms; }
+        .section.in-view .card:nth-child(3) { transition-delay: 180ms; }
+        .section.in-view .card:nth-child(4) { transition-delay: 240ms; }
+        .section.in-view .card:nth-child(5) { transition-delay: 300ms; }
+        .section.in-view .card:nth-child(6) { transition-delay: 360ms; }
+
+        /* floating layer assets (outside section grid) */
+        .layer-asset {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            image-rendering: pixelated;
+            opacity: 0.72;
+            pointer-events: none;
+            filter: drop-shadow(0 22px 36px rgba(0,0,0,0.55));
+            z-index: 1;
+        }
+        .layer-a { width: 150px; }
+        .layer-b { width: 172px; }
+        .edge-l1 { left: 3.5%; top: 20%; }
+        .edge-r1 { left: 80%; top: 32%; }
+        .edge-l2 { left: 4%; top: 50%; }
+        .edge-r2 { left: 80%; top: 58%; }
+        .edge-l3 { left: 3.5%; top: 78%; }
+        .edge-r3 { left: 80%; top: 84%; }
+
+        /* moving worms background */
+        #wrapWorms {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.48;
+            mix-blend-mode: screen;
+            image-rendering: pixelated;
+        }
+        .nav, .hero, .wrap { position: relative; z-index: 2; }
+        .wrap-bg { z-index: 1; }
+        .card::before{
+            content:"";
+            position:absolute;
+            inset:-40px;
+            background: radial-gradient(circle at 20% 20%, rgba(245,158,11,0.20), transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(34,211,238,0.14), transparent 55%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        .sprite {
+            width: 136px;
+            height: 136px;
+            border-radius: 14px;
+            background: rgba(2,6,23,0.75);
+            border: 1px solid rgba(255,255,255,0.10);
+            image-rendering: pixelated;
+            flex-shrink: 0;
+            overflow: hidden;
+            display:grid;
+            place-items:center;
+            position: relative;
+            z-index: 1;
+        }
+        .sprite img { width: 100%; height: 100%; object-fit: contain; }
+        .card .tag {
+            position: relative;
+            z-index: 1;
+        }
+        .tag {
+            margin-top: 2px;
+            display:inline-block;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 7px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(0,0,0,0.35);
+            color: rgba(255,247,230,0.85);
+        }
+        .tag.cyan { border-color: rgba(34,211,238,0.5); color:#b9f6ff; }
+        .tag.lime { border-color: rgba(52,211,153,0.5); color:#b7ffd9; }
+        .tag.pink { border-color: rgba(251,113,133,0.55); color:#ffd0d8; }
+
+        .worm-strip {
+            grid-column: span 12;
+            background: rgba(2,6,23,0.55);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 100px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 18px;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 560ms ease, transform 560ms ease;
+        }
+        .section.in-view .worm-strip {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 40ms;
+        }
+        .strip-left { min-width: 0; }
+        .strip-left b { color: var(--gold); }
+        .strip-left p { margin-top: 4px; font-size: 24px; color: rgba(255,247,230,0.72); line-height: 1.55; }
+        .strip-right { display:flex; gap: 10px; align-items: center; flex-shrink: 0; }
+        canvas { image-rendering: pixelated; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.14); }
+
+        .ca-row {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .ca-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(0,0,0,0.35);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            font-size: 12px;
+        }
+        .ca-value {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            opacity: 0.85;
+        }
+        .copy-btn {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(34,211,238,0.55);
+            background: rgba(34,211,238,0.14);
+            font-weight: 900;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .copy-btn:hover { transform: translateY(-1px); }
+
+        .asset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(251,113,133,0.55);
+            background: rgba(251,113,133,0.10);
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .asset-btn img {
+            width: 34px;
+            height: 34px;
+            image-rendering: pixelated;
+        }
+        .asset-btn:hover { transform: translateY(-1px); }
+
+        .footer {
+            padding: 26px 4.8vw 44px;
+            color: rgba(255,247,230,0.55);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* parallax-ready hooks */
+        .parallax-y {
+            transform: translateY(var(--py, 0px));
+            will-change: transform;
+        }
+        .footer-inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.35);
+        }
+
+        @media (max-width: 920px){
+            .hero-grid { grid-template-columns: 1fr; }
+            .card { grid-column: span 12; }
+            .worm-strip { flex-direction: column; align-items: flex-start; }
+            .strip-right { width: 100%; }
+            .section { min-height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-left">
+            <img src="/title.png" alt="Worms Agents Logo" class="nav-logo">
+            <span class="nav-badge">Worms Agents</span>
+            <span style="opacity:.65;font-weight:800;letter-spacing:.08em;">·</span>
+        </div>
+        <div class="nav-right">
+            <a class="nav-btn" href="#modules">Modules</a>
+            <a class="nav-btn" href="#how">How it works</a>
+            <a class="nav-btn primary" href="/app.html">Open Dapp</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <img class="float f1 parallax-y" data-parallax-speed="0.12" src="/PNG/Objects_separetely/Veins_shadow1_1.png" alt="">
+        <img class="float f2 parallax-y" data-parallax-speed="0.18" src="/PNG/Objects_separetely/Rock_eyes_shadow1_1.png" alt="">
+        <img class="float f3 parallax-y" data-parallax-speed="0.10" src="/PNG/Objects_separetely/Many_eyes_plant_shadow1_1.png" alt="">
+        <img class="float f4 parallax-y" data-parallax-speed="0.15" src="/PNG/Objects_separetely/Pustules_shadow1_1.png" alt="">
+
+        <div class="hero-grid">
+            <div>
+                <h1>Turn <span class="accent">$WORMS</span> holders into agents.</h1>
+                <p>Worms Agents maps the largest on-chain $WORMS holders into animated worms inside a flesh cavern UI. You ship rewards on a cadence. The colony reacts in real time.</p>
+                <div class="pillrow">
+                    <span class="pill gold">Base · $WORMS</span>
+                    <span class="pill cyan">≥0.5% becomes a worm</span>
+                    <span class="pill lime">Auto-refresh colony</span>
+                </div>
+                <div class="hero-cta">
+                    <a class="nav-btn primary" href="/app.html">Operate holders</a>
+                    <a class="nav-btn" href="https://basescan.org/" target="_blank">View contract</a>
+                </div>
+
+                <div class="ca-row">
+                    <div class="ca-field">
+                        <span>CA</span>
+                        <span class="ca-value" id="ca-value">TBA</span>
+                    </div>
+                    <button class="copy-btn" id="copy-ca">Copy</button>
+                    <a class="asset-btn" href="https://x.com/worms_x" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+                        <img src="/PNG/Objects_separetely/Eye_plant_shadow1_1.png" alt="">
+                        Twitter
+                    </a>
+                </div>
+            </div>
+            <div class="banner">
+                <img class="banner-logo" src="/favicon.png" alt="Worms Agents Icon">
+            </div>
+        </div>
+
+        <a class="chevron" href="#how" aria-label="Scroll">
+            <div class="chev"></div>
+        </a>
+    </header>
+
+    <div class="wrap-bg">
+    <canvas id="wrapWorms"></canvas>
+    <img class="layer-asset layer-a edge-l1 parallax-y" data-parallax-speed="0.08" src="/PNG/Objects_separetely/Veins_shadow1_2.png" alt="">
+    <img class="layer-asset layer-b edge-r1 parallax-y" data-parallax-speed="0.10" src="/PNG/Objects_separetely/Rock3_shadow1_2.png" alt="">
+    <img class="layer-asset layer-b edge-l2 parallax-y" data-parallax-speed="0.09" src="/PNG/Objects_separetely/Many_eyes_plant_shadow1_1.png" alt="">
+    <img class="layer-asset layer-a edge-r2 parallax-y" data-parallax-speed="0.11" src="/PNG/Objects_separetely/Bones_shadow1_4.png" alt="">
+    <img class="layer-asset layer-a edge-l3 parallax-y" data-parallax-speed="0.07" src="/PNG/Objects_separetely/Jaws_plant_shadow1_1.png" alt="">
+    <img class="layer-asset layer-b edge-r3 parallax-y" data-parallax-speed="0.12" src="/PNG/Objects_separetely/Pustules_shadow1_3.png" alt="">
+    <div class="wrap">
+        <section id="how" class="section">
+            <div class="section-head">
+                <div>
+                    <div class="section-title">How it works</div>
+                    <div class="section-sub">The dapp reads $WORMS holders. Eligible wallets (≥0.5% of supply; on a 100B token / 18 decimals reference that is 500M tokens at the line) become worms whose <strong>on-screen size grows with holding weight</strong>. Drop below 0.5% and you vanish next refresh. Rewards are automatic and distributed by the dev — holders do nothing.</div>
+                </div>
+                <a class="nav-btn primary" href="/app.html">Open dapp</a>
+            </div>
+            <div class="grid">
+                <div class="worm-strip">
+                    <div class="strip-left">
+                        <div style="font-weight:900;letter-spacing:.02em;">Animated preview</div>
+                        <p><b>Same sprite sheets</b> as the dapp. In the live cavern, holder worms are drawn <b>smaller or larger</b> from your % of supply (0.5% = smallest tier).</p>
+                    </div>
+                    <div class="strip-right">
+                        <canvas id="strip-worm-1" width="96" height="52"></canvas>
+                        <canvas id="strip-worm-2" width="96" height="52"></canvas>
+                        <canvas id="strip-worm-3" width="96" height="52"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Rock3_shadow1_3.png" alt=""></div>
+                        <h3>Holder mapping</h3>
+                    </div>
+                    <p class="card-desc">Only whales matter. Every wallet above 0.5% supply becomes a worm agent with wallet label + share. Sprite scale follows that share (floor 0.5% = minimum size).</p>
+                    <span class="tag lime">On-chain holders</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Tentacle_plant_shadow1_1.png" alt=""></div>
+                        <h3>Colony refresh</h3>
+                    </div>
+                    <p class="card-desc">The cavern re-syncs on an interval. If a wallet falls under threshold, its worm is removed.</p>
+                    <span class="tag cyan">Auto-refresh</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="modules" class="section">
+            <div class="section-head">
+                <div>
+                    <div class="section-title">Cavern modules</div>
+                    <div class="section-sub">These are the interactive objects you click in the dapp. The landing uses the same assets and explains the behavior.</div>
+                </div>
+                <a class="nav-btn" href="/app.html">Try it live</a>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Bones_shadow1_3.png" alt=""></div>
+                        <h3>Bones · Wallet scanner</h3>
+                    </div>
+                    <p class="card-desc">Open the modal. Check any wallet’s $WORMS balance + % of supply.</p>
+                    <span class="tag cyan">Balance check</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Many_eyes_plant_shadow1_2.png" alt=""></div>
+                        <h3>Many Eyes · AI console</h3>
+                    </div>
+                    <p class="card-desc">Local AI helper for holder strategy, market timing and reward cadence ideas.</p>
+                    <span class="tag pink">AI</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Veins_shadow1_3.png" alt=""></div>
+                        <h3>Veins · ETH pulse</h3>
+                    </div>
+                    <p class="card-desc">Live ETH price + 24h change. Use it to time reward drops.</p>
+                    <span class="tag lime">ETH</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Rock_eyes_shadow1_2.png" alt=""></div>
+                        <h3>Rock Eyes · Sentiment</h3>
+                    </div>
+                    <p class="card-desc">Fear &amp; greed snapshot. When the cavern is fearful, you feed it.</p>
+                    <span class="tag pink">Sentiment</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <div>
+                    <div class="section-title">Live Token Intel</div>
+                    <div class="section-sub">These sprites now open real $WORMS analytics in the dapp: fees, buybacks, bid wall, market cap and lifecycle data.</div>
+                </div>
+                <a class="nav-btn primary" href="/app.html">Enter cavern</a>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Pustules_shadow1_2.png" alt=""></div>
+                        <h3>Pustules · Micro price pulse</h3>
+                    </div>
+                    <p class="card-desc">Shows current price, price in ETH, and market cap snapshots for quick pulse checks.</p>
+                    <span class="tag lime">Live</span>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Fetus_shadow1_2.png" alt=""></div>
+                        <h3>Fetus · Token lifecycle</h3>
+                    </div>
+                    <p class="card-desc">Shows token status, owner wallet and creation timestamp from the live token endpoint.</p>
+                    <span class="tag cyan">Data</span>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Jaws_plant_shadow1_1.png" alt=""></div>
+                        <h3>Jaws · Fee estimator</h3>
+                    </div>
+                    <p class="card-desc">Estimates protocol fees from 24h volume using the default 0.30% rate.</p>
+                    <span class="tag pink">Fees</span>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="sprite"><img src="/PNG/Objects_separetely/Meat_flower_shadow1_1.png" alt=""></div>
+                        <h3>Meat Flower · Buyback</h3>
+                    </div>
+                    <p class="card-desc">Tracks buyback balance and buyback progress together with current 24h momentum.</p>
+                    <span class="tag lime">Buyback</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-inner">
+            <img src="/favicon.png" alt="Worms Agents Logo" class="footer-logo">
+            <span>Worms Agents · Built for $WORMS</span>
+        </div>
+    </div>
+
+    <script>
+        function animateStrip(id, variant) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            const img = new Image();
+            img.src = `/worms/8Bit-Worm-var${String(variant).padStart(2,'0')}-byImogiaGames.png`;
+            let frame = 0;
+            setInterval(() => {
+                ctx.clearRect(0, 0, el.width, el.height);
+                if (img.complete && img.naturalWidth) {
+                    ctx.drawImage(img, frame * 16, 0, 16, 16, 10, 8, el.width - 20, el.height - 16);
+                }
+                frame = (frame + 1) % 8;
+            }, 110);
+        }
+        animateStrip('strip-worm-1', 2);
+        animateStrip('strip-worm-2', 7);
+        animateStrip('strip-worm-3', 12);
+
+        // Copy CA (currently TBA)
+        document.getElementById('copy-ca')?.addEventListener('click', async () => {
+            const text = document.getElementById('ca-value')?.textContent?.trim() || 'TBA';
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch {
+                const t = document.createElement('textarea');
+                t.value = text;
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
+                t.remove();
+            }
+            const btn = document.getElementById('copy-ca');
+            if (btn) {
+                const prev = btn.textContent;
+                btn.textContent = 'Copied';
+                setTimeout(() => { btn.textContent = prev; }, 900);
+            }
+        });
+
+        // Animate object sprites by cycling frame files, like world.js
+        (function animateObjectSprites(){
+            const framesByBase = {
+                Tentacle_plant_shadow1: 3,
+                Eye_plant_shadow1: 3,
+                Spike_plant_shadow1: 4,
+                Bones_shadow1: 11,
+                Rock_eyes_shadow1: 5,
+                Veins_shadow1: 4,
+                Meat_flower_shadow1: 3,
+                Pustules_shadow1: 3,
+                Many_eyes_plant_shadow1: 3,
+                Fetus_shadow1: 3,
+                Jaws_plant_shadow1: 3,
+                Rock3_shadow1: 6,
+            };
+            const nodes = Array.from(document.querySelectorAll('img[src*="/PNG/Objects_separetely/"]'))
+                .map((img) => {
+                    const src = img.getAttribute('src') || '';
+                    const m = src.match(/\/Objects_separetely\/(.+)_([0-9]+)\.png$/);
+                    if (!m) return null;
+                    const base = m[1];
+                    const max = framesByBase[base];
+                    if (!max || max < 2) return null;
+                    return { img, base, frame: Number(m[2]) || 1, max };
+                })
+                .filter(Boolean);
+            if (!nodes.length) return;
+            setInterval(() => {
+                for (const n of nodes) {
+                    n.frame = (n.frame % n.max) + 1;
+                    n.img.src = `/PNG/Objects_separetely/${n.base}_${n.frame}.png`;
+                }
+            }, 240);
+        })();
+
+        // Background moving worms for wrap-bg
+        (function initWrapWorms(){
+            const c = document.getElementById('wrapWorms');
+            const wrapBg = document.querySelector('.wrap-bg');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            if (!ctx) return;
+            ctx.imageSmoothingEnabled = false;
+
+            const worms = Array.from({length: 12}, () => ({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                v: 0.6 + Math.random() * 1.1,
+                s: 44 + Math.random() * 56,
+                variant: Math.floor(Math.random() * 21),
+                phase: Math.floor(Math.random() * 8),
+                t: Math.random() * 9999,
+                dir: Math.random() > 0.5 ? 1 : -1,
+                bobAmp: 4 + Math.random() * 14,
+                bobSpd: 0.012 + Math.random() * 0.02,
+            }));
+
+            const imgs = [];
+            let ready = 0;
+            for (let i = 0; i < 21; i++) {
+                const im = new Image();
+                im.src = `/worms/8Bit-Worm-var${String(i).padStart(2,'0')}-byImogiaGames.png`;
+                im.onload = () => { ready++; };
+                imgs.push(im);
+            }
+
+            function resize(){
+                if (!wrapBg) return;
+                const rect = wrapBg.getBoundingClientRect();
+                c.width = Math.max(1, Math.floor(rect.width));
+                c.height = Math.max(1, Math.floor(wrapBg.scrollHeight));
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function tick(ts){
+                ctx.clearRect(0,0,c.width,c.height);
+                for (const w of worms) {
+                    w.t += 1;
+                    w.x += w.v * w.dir * 1.8;
+                    const by = Math.sin(w.t * w.bobSpd) * w.bobAmp;
+                    const frame = (Math.floor(ts / 90) + w.phase) % 8;
+                    if (w.x < -120) { w.x = c.width + 120; w.y = Math.random() * c.height; }
+                    if (w.x > c.width + 120) { w.x = -120; w.y = Math.random() * c.height; }
+                    const im = imgs[w.variant];
+                    if (!im || !im.complete || !im.naturalWidth) continue;
+                    ctx.save();
+                    // subtle shadow trail to emphasize movement
+                    ctx.globalAlpha = 0.35;
+                    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                    ctx.beginPath();
+                    ctx.ellipse(w.x, w.y + by + w.s * 0.36, w.s * 0.35, w.s * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    if (w.dir < 0) {
+                        ctx.translate(w.x, w.y + by);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(im, frame * 16, 0, 16, 16, -w.s/2, -w.s/2, w.s, w.s);
+                    } else {
+                        ctx.drawImage(im, frame * 16, 0, 16, 16, w.x - w.s/2, w.y + by - w.s/2, w.s, w.s);
+                    }
+                    ctx.restore();
+                }
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        })();
+
+        // Reveal sections/cards on scroll
+        (function initScrollReveal(){
+            const sections = document.querySelectorAll('.section');
+            if (!sections.length || !('IntersectionObserver' in window)) {
+                sections.forEach((s) => s.classList.add('in-view'));
+                return;
+            }
+            const io = new IntersectionObserver((entries) => {
+                for (const e of entries) {
+                    if (e.isIntersecting) e.target.classList.add('in-view');
+                }
+            }, { threshold: 0.15, rootMargin: '0px 0px -12% 0px' });
+            sections.forEach((s) => io.observe(s));
+        })();
+
+        // Parallax movement for decorative assets during scroll
+        (function initParallax(){
+            const nodes = Array.from(document.querySelectorAll('.parallax-y'));
+            if (!nodes.length) return;
+            function apply() {
+                const y = window.scrollY || window.pageYOffset || 0;
+                for (const n of nodes) {
+                    const speed = Number(n.getAttribute('data-parallax-speed') || 0.1);
+                    n.style.setProperty('--py', `${(y * speed).toFixed(2)}px`);
+                }
+            }
+            window.addEventListener('scroll', apply, { passive: true });
+            apply();
+        })();
+    </script>
+</body>
+</html>
