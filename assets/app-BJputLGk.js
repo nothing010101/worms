@@ -169,8 +169,8 @@ function qe(e, t, s, a, n, i) {
 }
 const H = "https://dev-api.flayerlabs.xyz"
   , I = "base"
-  , Xe = ""
-  , de = "".trim()
+  , Xe = "0xECbdB1F71a8727c291dA420d326953c749a88b07"
+  , de = "0xECbdB1F71a8727c291dA420d326953c749a88b07".trim()
   , Ye = /^0x[a-fA-F0-9]{40}$/
   , q = Ye.test(de) ? de : Xe;
 async function te(e) {
