@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worms Agents — Colony Dapp</title>
+    <link rel="icon" type="image/png" href="/title.png">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .back-link {
+            position: fixed;
+            top: 16px;
+            left: calc(242px + 28px);
+            z-index: 30;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: rgba(245,158,11,0.55);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #f59e0b; }
+    </style>
+  <script type="module" crossorigin src="/assets/app-BJputLGk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/app-By-cQEH0.css">
+</head>
+<body>
+
+<a href="index.html" class="back-link">← Home</a>
+
+<!-- ── Game canvas ─────────────────────────────────────────────────────────── -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- ── Loading overlay ────────────────────────────────────────────────────── -->
+<div id="loader">
+    <canvas id="loaderWorm" width="128" height="64"></canvas>
+    <p class="loader-text">Spawning colony…</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!--  LEFT PANEL – Colony control                                              -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<aside class="panel panel-left">
+
+    <header class="panel-header">
+        <canvas id="marqueeCanvas" width="64" height="64"></canvas>
+        <div class="panel-title">
+            <span class="label-small">Worms Agents</span>
+            <h1>Worms Agents</h1>
+        </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value" id="worm-count">0</span>
+            <span class="stat-label">Agents</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="mode">Solo</span>
+            <span class="stat-label">Mode</span>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="spawn-section">
+        <label class="field-label">Core Token · $WORMS</label>
+        <input id="tokenInput" type="text" class="text-input small"
+               value="0x54ee379a7c722c961b0fdfb514b3e34b91663b1f"
+               autocomplete="off" spellcheck="false" readonly/>
+        <button id="loadHoldersBtn" class="spawn-btn small">
+            Refresh Holders
+        </button>
+        <div class="divider" style="margin:4px 0"></div>
+        <label class="field-label">Find Holder Worm</label>
+        <input id="walletFocusInput" type="text" class="text-input small"
+               placeholder="0x... holder wallet"
+               autocomplete="off" spellcheck="false"/>
+        <button id="walletFocusBtn" class="spawn-btn small">
+            Select Holder
+        </button>
+        <div id="wallet-focus-status" style="font-size:9px;color:var(--dim);text-align:center;min-height:14px;"></div>
+        <div id="holder-status" style="font-size:9px;color:var(--dim);text-align:center;min-height:14px;"></div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="legend">
+        <span class="label-small">Holder Rules</span>
+        <div class="legend-row">Minimum eligible wallet: <b>0.5% supply</b></div>
+        <div class="legend-row">Each eligible holder becomes one worm</div>
+        <div class="legend-row">Revenue streams while wallet remains holder</div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="legend asset-shortcuts">
+        <span class="label-small">Cavern assets</span>
+        <p class="asset-shortcuts-hint">Click to open the same modals as in-world sprites.</p>
+        <div class="asset-shortcut-list">
+            <button type="button" class="asset-shortcut" id="sb-bones" title="Wallet balance check">
+                <img src="/PNG/Objects_separetely/Bones_shadow1_3.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Bones</b><span>Wallet balance check</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-manyeyes" title="AI chat">
+                <img src="/PNG/Objects_separetely/Many_eyes_plant_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Many Eyes</b><span>AI console</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-veins" title="ETH pulse">
+                <img src="/PNG/Objects_separetely/Veins_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Veins</b><span>ETH on Base pulse</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-rockeyes" title="Sentiment">
+                <img src="/PNG/Objects_separetely/Rock_eyes_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Rock Eyes</b><span>Market sentiment</span></div>
+            </button>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="legend asset-shortcuts">
+        <span class="label-small">Live token intel</span>
+        <p class="asset-shortcuts-hint">Quick open: price pulse, lifecycle, fees, buyback.</p>
+        <div class="asset-shortcut-list">
+            <button type="button" class="asset-shortcut" id="sb-pustules" title="Micro price pulse">
+                <img src="/PNG/Objects_separetely/Pustules_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Pustules</b><span>Micro price pulse</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-fetus" title="Token lifecycle">
+                <img src="/PNG/Objects_separetely/Fetus_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Fetus</b><span>Token lifecycle</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-jaws" title="Fee estimator">
+                <img src="/PNG/Objects_separetely/Jaws_plant_shadow1_1.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Jaws</b><span>Fee estimator</span></div>
+            </button>
+            <button type="button" class="asset-shortcut" id="sb-meatflower" title="Buyback">
+                <img src="/PNG/Objects_separetely/Meat_flower_shadow1_2.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <div class="asset-shortcut-text"><b>Meat Flower</b><span>Buyback progress</span></div>
+            </button>
+        </div>
+    </section>
+
+    <footer class="panel-footer">
+        <span>Worms Agents × Flaunch · Base</span>
+    </footer>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!--  RIGHT PANEL – Agent profile / Revenue / Flaunch                         -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<aside class="panel panel-right">
+    <div class="rp-topbar">
+        <span class="label-small">Agent Panel</span>
+        <span class="rp-hint-small">click a worm or asset</span>
+    </div>
+    <div id="right-panel-body" class="rp-body">
+        <!-- dynamically populated by ui.js -->
+    </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!--  BOTTOM BAR – Activity feed                                               -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div class="bottom-bar">
+    <div class="bottom-bar-label">
+        <span class="live-dot"></span>
+        <span class="label-small">Colony Log</span>
+    </div>
+    <div id="activity-list" class="activity-list">
+        <span class="dim">Waiting for activity…</span>
+    </div>
+</div>
+
+<!-- ── Scripts ────────────────────────────────────────────────────────────── -->
+
+<script>
+function animateWormCanvas(id, variant, dw, dh, ms) {
+    const mc = document.getElementById(id);
+    if (!mc) return;
+    const ctx = mc.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    const img = new Image();
+    img.src = `/worms/8Bit-Worm-var${String(variant).padStart(2,'0')}-byImogiaGames.png`;
+    let frame = 0;
+    setInterval(() => {
+        ctx.clearRect(0, 0, mc.width, mc.height);
+        if (img.complete && img.naturalWidth) ctx.drawImage(img, frame * 16, 0, 16, 16, 0, 0, dw, dh);
+        frame = (frame + 1) % 8;
+    }, ms);
+}
+const v = Math.floor(Math.random() * 21);
+animateWormCanvas('marqueeCanvas', v, 64, 64, 110);
+animateWormCanvas('loaderWorm',   v, 128, 64, 90);
+</script>
+
+</body>
+</html>
