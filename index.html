@@ -780,7 +780,7 @@
             const nodes = Array.from(document.querySelectorAll('img[src*="/PNG/Object_separetely/"]'))
                 .map((img) => {
                     const src = img.getAttribute('src') || '';
-                    const m = src.match(/\/Objects_separetely\/(.+)_([0-9]+)\.png$/);
+                    const m = src.match(/\/Object_separetely\/(.+)_([0-9]+)\.png$/);
                     if (!m) return null;
                     const base = m[1];
                     const max = framesByBase[base];
