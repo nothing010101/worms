@@ -199,5 +199,15 @@ animateWormCanvas('marqueeCanvas', v, 64, 64, 110);
 animateWormCanvas('loaderWorm',   v, 128, 64, 90);
 </script>
 
+
+<script>
+  // Fallback: hide loader after 5s if API call never returns (token not live yet)
+  setTimeout(function() {
+    var loader = document.getElementById('loader');
+    if (loader && !loader.classList.contains('hidden')) {
+      loader.style.display = 'none';
+    }
+  }, 5000);
+</script>
 </body>
 </html>
